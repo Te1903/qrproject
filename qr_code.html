@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quà tặng Sinh nhật</title>
+  <style>
+    html, body { margin: 0; padding: 0; overflow: hidden; background: black; }
+    canvas { display: block; }
+    .title {
+      position: absolute;
+      top: 45%;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 2rem;
+      font-family: 'Comic Sans MS', cursive;
+      text-shadow: 0 0 15px pink;
+    }
+  </style>
+</head>
+<body>
+  <div class="title">✨ Chúc Mừng Sinh Nhật✨</div>     
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    camera.position.z = 80;
+
+    // ------------------ Hình trái tim ------------------
+    const particles = 3000;
+    const geometry = new THREE.BufferGeometry();
+    const positions = [];
+    const colors = [];
+
+    function heartShape(t) {
+      const x = 16 * Math.pow(Math.sin(t), 3);
+      const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
+      return [x, y];
+    }
+
+    for (let i = 0; i < particles; i++) {
+      const t = Math.random() * Math.PI * 2;
+      const [hx, hy] = heartShape(t);
+      const x = hx + (Math.random() - 0.5) * 2;
+      const y = hy + (Math.random() - 0.5) * 2;
+      const z = (Math.random() - 0.5) * 10;
+      positions.push(x, y, z);
+      colors.push(1, 0.4 + Math.random()*0.4, 0.7 + Math.random()*0.3);
+    }
+
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+      size: 0.6,
+      vertexColors: true,
+      transparent: true,
+      opacity: 0.9
+    });
+
+    const heart = new THREE.Points(geometry, material);
+    scene.add(heart);
+
+    // ------------------ Vòng xoáy galaxy bên dưới ------------------
+    const galaxyGeo = new THREE.BufferGeometry();
+    const galaxyPos = [];
+    const galaxyColors = [];
+    for (let i = 0; i < 1500; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const radius = 20 + Math.random() * 50;
+      const x = Math.cos(angle) * radius;
+      const z = Math.sin(angle) * radius;
+      const y = -30 + Math.random() * 5;
+      galaxyPos.push(x, y, z);
+      galaxyColors.push(1, 1, 1);
+    }
+    galaxyGeo.setAttribute('position', new THREE.Float32BufferAttribute(galaxyPos, 3));
+    galaxyGeo.setAttribute('color', new THREE.Float32BufferAttribute(galaxyColors, 3));
+    const galaxyMat = new THREE.PointsMaterial({ size: 0.5, vertexColors: true, transparent: true, opacity: 0.8 });
+    const galaxyRing = new THREE.Points(galaxyGeo, galaxyMat);
+    scene.add(galaxyRing);
+
+    // ------------------ Animation ------------------
+    function animate() {
+      requestAnimationFrame(animate);
+      heart.rotation.y += 0.002;
+      heart.rotation.x = Math.sin(Date.now() * 0.001) * 0.1;
+
+      galaxyRing.rotation.y += 0.001;
+
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // ------------------ Resize ------------------
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
